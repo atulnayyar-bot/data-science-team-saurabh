@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Team Hub — DS Pod Tracker</title>
+<title>Saurabh's Data Science Team</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Outfit:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -164,7 +164,7 @@ tbody tr:last-child td{border-bottom:none}tbody tr:hover td{background:var(--sur
 </head>
 <body>
 <div class="app">
-  <div class="hero"><div class="hero-row"><div><h1>Team Hub</h1><p>Data Science Pod Tracker &mdash; unified team sheet, availability, and skills across both pods.</p></div>
+  <div class="hero"><div class="hero-row"><div><h1>Saurabh's Data Science Team</h1><p>Data Science Team Tracker &mdash; unified team sheet, availability, and skills across both pods.</p></div>
     <div class="hero-actions">
       <button class="btn" onclick="exportData()">&#8681; Export</button>
       <button class="btn" onclick="document.getElementById('importFile').click()">&#8679; Import</button>
@@ -174,8 +174,8 @@ tbody tr:last-child td{border-bottom:none}tbody tr:hover td{background:var(--sur
 
   <div class="stats">
     <div class="stat-card"><div class="stat-label">Total Members</div><div class="stat-value" id="statTotal" style="color:var(--gold)">0</div></div>
-    <div class="stat-card"><div class="stat-label">Pod 1 &middot; Mridul</div><div class="stat-value" id="statPod1" style="color:var(--sky)">0</div></div>
-    <div class="stat-card"><div class="stat-label">Pod 2 &middot; Abdul</div><div class="stat-value" id="statPod2" style="color:var(--violet)">0</div></div>
+    <div class="stat-card"><div class="stat-label">Mridul's Pod</div><div class="stat-value" id="statPod1" style="color:var(--sky)">0</div></div>
+    <div class="stat-card"><div class="stat-label">Abdul's Pod</div><div class="stat-value" id="statPod2" style="color:var(--violet)">0</div></div>
     <div class="stat-card"><div class="stat-label">On Leave Today</div><div class="stat-value" id="statLeave" style="color:var(--coral)">0</div></div>
   </div>
 
@@ -218,7 +218,7 @@ tbody tr:last-child td{border-bottom:none}tbody tr:hover td{background:var(--sur
   <div class="form-grid">
     <div class="form-group"><label>Full Name *</label><input id="fName" placeholder="e.g. Priya Sharma"></div>
     <div class="form-group"><label>Email *</label><input id="fEmail" type="email" placeholder="priya@company.com"></div>
-    <div class="form-group"><label>Pod *</label><select id="fPod"><option value="Pod 1">Pod 1 &middot; Mridul</option><option value="Pod 2">Pod 2 &middot; Abdul</option></select></div>
+    <div class="form-group"><label>Pod *</label><select id="fPod"><option value="Pod 1">Mridul's Pod</option><option value="Pod 2">Abdul's Pod</option><option value="Not Applicable">Not Applicable</option></select></div>
     <div class="form-group"><label>Designation *</label><select id="fDesg"><option value="IC">IC (Individual Contributor)</option><option value="Pod Lead">Pod Lead</option><option value="Team Lead">Team Lead</option><option value="DM">DM (Delivery Manager)</option></select></div>
     <div class="form-group"><label>Role / Title</label><input id="fRole" placeholder="e.g. Senior Data Scientist"></div>
     <div class="form-group"><label>Country</label><select id="fCountry"></select></div>
@@ -261,29 +261,29 @@ tbody tr:last-child td{border-bottom:none}tbody tr:hover td{background:var(--sur
 <script>
 // ═══ COUNTRY DATA WITH FLAGS ═══
 const COUNTRIES=[
-{name:"India",flag:"\ud83c\uddee\ud83c\uddf3",tz:"IST (UTC+5:30)"},
-{name:"Pakistan",flag:"\ud83c\uddf5\ud83c\uddf0",tz:"PKT (UTC+5)"},
-{name:"Brazil",flag:"\ud83c\udde7\ud83c\uddf7",tz:"BRT (UTC-3)"},
-{name:"Colombia",flag:"\ud83c\udde8\ud83c\uddf4",tz:"COT (UTC-5)"},
-{name:"Kenya",flag:"\ud83c\uddf0\ud83c\uddea",tz:"EAT (UTC+3)"},
-{name:"United States",flag:"\ud83c\uddfa\ud83c\uddf8",tz:"PST (UTC-8)"},
-{name:"United Kingdom",flag:"\ud83c\uddec\ud83c\udde7",tz:"GMT (UTC+0)"},
-{name:"Canada",flag:"\ud83c\udde8\ud83c\udde6",tz:"EST (UTC-5)"},
-{name:"Germany",flag:"\ud83c\udde9\ud83c\uddea",tz:"CET (UTC+1)"},
-{name:"Argentina",flag:"\ud83c\udde6\ud83c\uddf7",tz:"BRT (UTC-3)"},
-{name:"Mexico",flag:"\ud83c\uddf2\ud83c\uddfd",tz:"CST (UTC-6)"},
-{name:"Philippines",flag:"\ud83c\uddf5\ud83c\udded",tz:"SGT (UTC+8)"},
-{name:"Nigeria",flag:"\ud83c\uddf3\ud83c\uddec",tz:"CET (UTC+1)"},
-{name:"Bangladesh",flag:"\ud83c\udde7\ud83c\udde9",tz:"IST (UTC+5:30)"},
-{name:"Turkey",flag:"\ud83c\uddf9\ud83c\uddf7",tz:"EAT (UTC+3)"},
-{name:"Egypt",flag:"\ud83c\uddea\ud83c\uddec",tz:"EAT (UTC+3)"},
-{name:"Ukraine",flag:"\ud83c\uddfa\ud83c\udde6",tz:"CET (UTC+1)"},
-{name:"Poland",flag:"\ud83c\uddf5\ud83c\uddf1",tz:"CET (UTC+1)"},
-{name:"Sri Lanka",flag:"\ud83c\uddf1\ud83c\uddf0",tz:"IST (UTC+5:30)"},
-{name:"Nepal",flag:"\ud83c\uddf3\ud83c\uddf5",tz:"IST (UTC+5:30)"},
+{name:"India",flag:"🇮🇳",tz:"IST (UTC+5:30)"},
+{name:"Pakistan",flag:"🇵🇰",tz:"PKT (UTC+5)"},
+{name:"Brazil",flag:"🇧🇷",tz:"BRT (UTC-3)"},
+{name:"Colombia",flag:"🇨🇴",tz:"COT (UTC-5)"},
+{name:"Kenya",flag:"🇰🇪",tz:"EAT (UTC+3)"},
+{name:"United States",flag:"🇺🇸",tz:"PST (UTC-8)"},
+{name:"United Kingdom",flag:"🇬🇧",tz:"GMT (UTC+0)"},
+{name:"Canada",flag:"🇨🇦",tz:"EST (UTC-5)"},
+{name:"Germany",flag:"🇩🇪",tz:"CET (UTC+1)"},
+{name:"Argentina",flag:"🇦🇷",tz:"BRT (UTC-3)"},
+{name:"Mexico",flag:"🇲🇽",tz:"CST (UTC-6)"},
+{name:"Philippines",flag:"🇵🇭",tz:"SGT (UTC+8)"},
+{name:"Nigeria",flag:"🇳🇬",tz:"CET (UTC+1)"},
+{name:"Bangladesh",flag:"🇧🇩",tz:"IST (UTC+5:30)"},
+{name:"Turkey",flag:"🇹🇷",tz:"EAT (UTC+3)"},
+{name:"Egypt",flag:"🇪🇬",tz:"EAT (UTC+3)"},
+{name:"Ukraine",flag:"🇺🇦",tz:"CET (UTC+1)"},
+{name:"Poland",flag:"🇵🇱",tz:"CET (UTC+1)"},
+{name:"Sri Lanka",flag:"🇱🇰",tz:"IST (UTC+5:30)"},
+{name:"Nepal",flag:"🇳🇵",tz:"IST (UTC+5:30)"},
 ].sort((a,b)=>a.name.localeCompare(b.name));
 
-function getFlag(country){const c=COUNTRIES.find(x=>x.name===country);return c?c.flag:""}
+function getFlag(country){const c=COUNTRIES.find(x=>x.name===country);return c?c.flag:''}
 
 // Populate country dropdown
 const countrySelect=document.getElementById('fCountry');
