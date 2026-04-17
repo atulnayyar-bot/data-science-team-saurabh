@@ -207,7 +207,7 @@ tbody tr:last-child td{border-bottom:none}tbody tr:hover td{background:var(--sur
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px 36px;width:100%;max-width:400px;animation:fadeIn 0.3s ease;text-align:center">
     <div style="font-size:36px;margin-bottom:12px">🧠</div>
     <h2 style="font-family:var(--serif);font-size:22px;font-weight:700;background:linear-gradient(135deg,var(--text) 0%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px">Saurabh's DS Team</h2>
-    <p style="font-size:13px;color:var(--text-dim);margin-bottom:24px;line-height:1.6">Enter your Turing work email to access the hub.<br>Your access level is determined by your email.</p>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:24px;line-height:1.6">Enter your Turing work email to access the hub.<br>You can view all members and edit your own card.</p>
     <div style="display:flex;flex-direction:column;gap:10px;text-align:left">
       <input id="loginEmail" type="email" placeholder="you@turing.com"
         style="padding:11px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;font-family:var(--font);transition:border-color 0.2s;width:100%"
@@ -220,7 +220,7 @@ tbody tr:last-child td{border-bottom:none}tbody tr:hover td{background:var(--sur
       </button>
       <p id="loginErr" style="font-size:12px;color:var(--coral);text-align:center;display:none;margin-top:2px;line-height:1.5"></p>
     </div>
-    <p style="font-size:11px;color:var(--text-dim);margin-top:20px">Admins get full access · Team members can edit their own card only</p>
+    <p style="font-size:11px;color:var(--text-dim);margin-top:20px">Open to all @turing.com · Admins can edit everyone · Members edit their own card only</p>
   </div>
 </div>
 
@@ -515,7 +515,18 @@ function renderRoster(){
 }
 
 // ═══ MEMBER MODAL ═══
-function openAddMember(){document.getElementById('modalTitle').textContent='Add Team Member';document.getElementById('editId').value='';document.getElementById('fPhoto').value='';['fName','fEmail','fRole','fCity','fHours','fDoj','fExp','fSlack','fSkills','fStrengths','fCv','fProject'].forEach(id=>document.getElementById(id).value='');document.getElementById('fPod').value='Pod 1';document.getElementById('fDesg').value='IC';document.getElementById('fCountry').value='';document.getElementById('fTimezone').value='IST (UTC+5:30)';document.getElementById('photoPreview').innerHTML='<span class="placeholder">&#129399;</span>';document.getElementById('memberModal').classList.add('open')}
+function openAddMember(){
+  document.getElementById('modalTitle').textContent='Add Team Member';
+  document.getElementById('editId').value='';document.getElementById('fPhoto').value='';
+  ['fName','fEmail','fRole','fCity','fHours','fDoj','fExp','fSlack','fSkills','fStrengths','fCv','fProject'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fPod').value='Pod 1';document.getElementById('fDesg').value='IC';
+  document.getElementById('fCountry').value='';document.getElementById('fTimezone').value='IST (UTC+5:30)';
+  document.getElementById('photoPreview').innerHTML='<span class="placeholder">&#129399;</span>';
+  // Reset email field in case it was locked by openAddSelf
+  const emailField = document.getElementById('fEmail');
+  emailField.readOnly = false; emailField.style.opacity = ''; emailField.style.cursor = '';
+  document.getElementById('memberModal').classList.add('open');
+}
 function editMember(id){const m=members.find(x=>x.id===id);if(!m)return;document.getElementById('modalTitle').textContent='Edit Member';document.getElementById('editId').value=id;document.getElementById('fName').value=m.name||'';document.getElementById('fEmail').value=m.email||'';document.getElementById('fPod').value=m.pod||'Pod 1';document.getElementById('fDesg').value=m.designation||'IC';document.getElementById('fRole').value=m.role||'';document.getElementById('fCountry').value=m.country||'';document.getElementById('fCity').value=m.city||'';document.getElementById('fTimezone').value=m.timezone||'IST (UTC+5:30)';document.getElementById('fHours').value=m.hours||'';document.getElementById('fDoj').value=m.doj||'';document.getElementById('fExp').value=m.exp||'';document.getElementById('fSlack').value=m.slack||'';document.getElementById('fSkills').value=(m.skills||[]).join(', ');document.getElementById('fStrengths').value=m.strengths||'';document.getElementById('fCv').value=m.cv||'';document.getElementById('fProject').value=m.project||'';document.getElementById('fPhoto').value=m.photo||'';document.getElementById('photoPreview').innerHTML=m.photo?'<img src="'+m.photo+'" alt="">':'<span class="placeholder">&#129399;</span>';document.getElementById('memberModal').classList.add('open')}
 function closeMemberModal(){document.getElementById('memberModal').classList.remove('open')}
 function handlePhotoUpload(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=function(ev){document.getElementById('fPhoto').value=ev.target.result;document.getElementById('photoPreview').innerHTML='<img src="'+ev.target.result+'" alt="">';};r.readAsDataURL(file);e.target.value='';}
@@ -618,7 +629,7 @@ const ADMIN_EMAILS = [
   'atul.nayyar@turing.com',
   'saurabh.choudhary@turing.com',
   'shivank.d@turing.com',
-  'mridul.g@turing.com', 
+  'mridul.g@turing.com',
   'rana.a@turing.com'
 ];
 
@@ -638,12 +649,8 @@ function doLogin() {
   const errEl = document.getElementById('loginErr');
   if (!email) { showLoginError('Please enter your email.'); return; }
   if (!email.endsWith('@turing.com')) { showLoginError('Please use your @turing.com work email.'); return; }
+  // Anyone with a @turing.com email can log in
   const knownMember = members.find(m => m.email.toLowerCase() === email);
-  const isAdminEmail = ADMIN_EMAILS.includes(email);
-  if (!knownMember && !isAdminEmail) {
-    showLoginError('Email not recognised. Check you\'ve entered your Turing email correctly, or ask an admin to add you first.');
-    return;
-  }
   const name = knownMember ? knownMember.name : email.split('@')[0];
   currentUser = { email, name };
   sessionStorage.setItem('th_user_email', email);
@@ -662,8 +669,31 @@ function showLoginError(msg) {
 
 function applyAccessUI() {
   const addMemberBtn = document.querySelector('[onclick="openAddMember()"]');
-  if (addMemberBtn) addMemberBtn.style.display = isAdmin() ? '' : 'none';
+  if (addMemberBtn) {
+    if (isAdmin()) {
+      addMemberBtn.textContent = '+ Add Member';
+      addMemberBtn.style.display = '';
+    } else {
+      // Show "Add Myself" only if they aren't already in the roster
+      const alreadyAdded = currentUser && members.find(m => m.email.toLowerCase() === currentUser.email.toLowerCase());
+      addMemberBtn.style.display = alreadyAdded ? 'none' : '';
+      addMemberBtn.textContent = '+ Add Myself';
+      addMemberBtn.onclick = null;
+      addMemberBtn.setAttribute('onclick', 'openAddSelf()');
+    }
+  }
   renderAll();
+}
+
+function openAddSelf() {
+  // Pre-fill the member modal with the logged-in user's email, locked
+  openAddMember();
+  const emailField = document.getElementById('fEmail');
+  emailField.value = currentUser.email;
+  emailField.readOnly = true;
+  emailField.style.opacity = '0.6';
+  emailField.style.cursor = 'not-allowed';
+  document.getElementById('modalTitle').textContent = 'Add Yourself';
 }
 
 function updateUserBadge() {
