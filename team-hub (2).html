@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saurabh's Data Science Team</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Outfit:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0d0c11;--surface:#16151c;--surface2:#1e1d26;--surface3:#272630;
+  --border:#2e2d3d;--border-hover:#45445f;
+  --text:#ece9f1;--text-muted:#9b97a8;--text-dim:#6b6780;
+  --gold:#e8b931;--gold-dim:#5c4a13;--gold-glow:rgba(232,185,49,0.08);
+  --coral:#f97066;--coral-dim:#5c1a16;
+  --mint:#34d399;--mint-dim:#0b4d32;
+  --sky:#60a5fa;--sky-dim:#1e3a5f;
+  --violet:#a78bfa;--violet-dim:#3b2d6b;
+  --cyan:#22d3ee;--cyan-dim:#0a3d47;
+  --font:'Outfit',system-ui,sans-serif;
+  --serif:'Fraunces','Georgia',serif;
+  --mono:'IBM Plex Mono','Menlo',monospace;
+  --radius:10px;--radius-lg:14px;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh;position:relative;overflow-x:hidden}
+#bgCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.app{max-width:1100px;margin:0 auto;padding:0 20px 80px;position:relative;z-index:1}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+input,select,textarea,button{font-family:var(--font)}
+
+/* HERO */
+.hero{padding:44px 0 28px}
+.hero-row{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.hero h1{font-family:var(--serif);font-size:32px;font-weight:700;letter-spacing:-0.03em;background:linear-gradient(135deg,var(--text) 0%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--text-muted);font-size:14px;margin-top:4px}
+.hero-actions{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap}
+.btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--border-hover);color:var(--text);background:var(--surface2)}
+.btn-gold{background:var(--gold);color:var(--bg);border-color:var(--gold)}.btn-gold:hover{background:#d4a72a;border-color:#d4a72a;color:var(--bg)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-danger{color:var(--coral);border-color:var(--coral-dim)}.btn-danger:hover{background:var(--coral-dim)}
+.btn-cyan{background:rgba(34,211,238,0.1);color:var(--cyan);border-color:rgba(34,211,238,0.3)}.btn-cyan:hover{background:rgba(34,211,238,0.2);color:var(--text)}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:24px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px}
+.stat-label{font-size:11px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em}
+.stat-value{font-family:var(--serif);font-size:28px;font-weight:700;margin-top:2px}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--border);overflow-x:auto}
+.tab{padding:10px 20px;font-size:14px;font-weight:500;color:var(--text-dim);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s;white-space:nowrap;flex-shrink:0}
+.tab:hover{color:var(--text-muted)}.tab.active{color:var(--gold);border-bottom-color:var(--gold);font-weight:600}
+
+/* PANELS */
+.panel{display:none;animation:fadeIn 0.3s ease}.panel.visible{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:2}
+tbody td{padding:8px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}tbody tr:hover td{background:var(--surface2)}
+.member-cell{display:flex;align-items:center;gap:10px}
+.member-name{font-weight:600}.member-email{font-size:11px;color:var(--text-dim)}
+.avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0;overflow:hidden;background:var(--surface3)}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;margin:2px}
+.tag-pod1{background:rgba(96,165,250,0.12);color:var(--sky);border:1px solid rgba(96,165,250,0.25)}
+.tag-pod2{background:rgba(167,139,250,0.12);color:var(--violet);border:1px solid rgba(167,139,250,0.25)}
+.tag-na{background:rgba(107,103,128,0.15);color:var(--text-muted);border:1px solid rgba(107,103,128,0.3)}
+.tag-gold{background:var(--gold-dim);color:var(--gold)}.tag-mint{background:var(--mint-dim);color:var(--mint)}
+.tag-sky{background:var(--sky-dim);color:var(--sky)}.tag-violet{background:var(--violet-dim);color:var(--violet)}
+.tag-coral{background:var(--coral-dim);color:var(--coral)}.tag-cyan{background:var(--cyan-dim);color:var(--cyan)}
+.desg-ic{color:var(--text-muted)}.desg-pl{color:var(--sky)}.desg-tl{color:var(--gold)}.desg-dm{color:var(--mint)}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);z-index:100;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;animation:fadeIn 0.25s ease}
+.modal h2{font-family:var(--serif);font-size:22px;font-weight:600;margin-bottom:4px}
+.modal .subtitle{font-size:13px;color:var(--text-dim);margin-bottom:24px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:4px}.form-group.full{grid-column:1/-1}
+.form-group label{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em}
+.form-group input,.form-group select,.form-group textarea{padding:9px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;transition:border-color 0.2s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--gold)}
+.form-group textarea{resize:vertical;min-height:60px}
+.form-group select{cursor:pointer}.form-group select option{background:var(--surface2);color:var(--text)}
+.form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
+
+/* PHOTO */
+.photo-upload{display:flex;align-items:center;gap:16px;margin-bottom:8px}
+.photo-preview{width:64px;height:64px;border-radius:50%;background:var(--surface3);border:2px dashed var(--border);overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.photo-preview img{width:100%;height:100%;object-fit:cover}
+.photo-preview .placeholder{font-size:28px}
+
+/* TEAM CARDS */
+.poke-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.poke-card{position:relative;border-radius:16px;overflow:hidden;background:var(--surface);border:2px solid var(--border);transition:all 0.3s;cursor:default}
+.poke-card:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,0.4)}
+.poke-card-top{padding:20px 20px 16px;position:relative;overflow:hidden}
+.poke-card-top::before{content:'';position:absolute;inset:0;opacity:0.08}
+.poke-card.pod1 .poke-card-top::before{background:linear-gradient(135deg,var(--sky),transparent)}
+.poke-card.pod2 .poke-card-top::before{background:linear-gradient(135deg,var(--violet),transparent)}
+.poke-card.pod-na .poke-card-top::before{background:linear-gradient(135deg,var(--text-dim),transparent)}
+.poke-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;position:relative}
+.poke-card-header .name{font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:-0.01em}
+.poke-card-header .pod-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:0.06em}
+.poke-avatar-row{display:flex;align-items:center;gap:16px;position:relative}
+.poke-avatar{width:72px;height:72px;border-radius:50%;border:3px solid var(--border);overflow:hidden;background:var(--surface2);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.poke-avatar img{width:100%;height:100%;object-fit:cover}
+.poke-avatar .ninja-default{font-size:40px}
+.poke-meta{flex:1}.poke-meta .role{font-size:13px;color:var(--text-muted);margin-bottom:2px}
+.poke-meta .desg{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+.poke-meta .loc{font-size:12px;color:var(--text-dim);display:flex;align-items:center;gap:4px}
+.poke-meta .loc .flag{font-size:16px}
+.poke-card-body{padding:0 20px 16px}
+.poke-stat-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.poke-stat{flex:1;min-width:80px;background:var(--surface2);border-radius:8px;padding:8px 10px;text-align:center}
+.poke-stat .val{font-family:var(--serif);font-size:16px;font-weight:700}
+.poke-stat .lbl{font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-top:1px}
+.poke-skills{margin-top:8px}.poke-skills-label{font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
+.poke-skills-tags{display:flex;flex-wrap:wrap;gap:4px}
+.poke-card-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.poke-card-footer .email{font-size:11px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.poke-card-footer .actions{display:flex;gap:4px;flex-shrink:0}
+.poke-photo-btn{position:absolute;bottom:0;right:0;width:24px;height:24px;border-radius:50%;background:var(--gold);border:2px solid var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;color:var(--bg);font-weight:700;transition:transform 0.2s}
+.poke-photo-btn:hover{transform:scale(1.15)}
+
+/* CALENDAR */
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.cal-header h3{font-family:var(--serif);font-size:20px;font-weight:600}
+.cal-nav{display:flex;align-items:center;gap:12px}
+.cal-nav button{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.cal-nav button:hover{border-color:var(--gold);color:var(--gold)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:16px}
+.cal-day-header{padding:8px 4px;text-align:center;font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase}
+.cal-cell{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px;min-height:70px;transition:all 0.15s;cursor:pointer}
+.cal-cell:hover{border-color:var(--border-hover)}.cal-cell.empty{background:transparent;border-color:transparent;cursor:default}
+.cal-cell.today{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}.cal-cell.weekend{background:var(--surface2)}
+.cal-date{font-size:11px;font-weight:600;color:var(--text-dim);margin-bottom:4px}.cal-cell.today .cal-date{color:var(--gold)}
+.cal-leave{font-size:9px;font-weight:600;padding:2px 5px;border-radius:4px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.cal-leave.leave{background:var(--coral-dim);color:var(--coral)}.cal-leave.half{background:var(--gold-dim);color:var(--gold)}
+.leave-legend{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted)}
+.legend-dot{width:10px;height:10px;border-radius:3px}
+
+/* LEAVE MODAL */
+.leave-form-row{display:flex;gap:10px;align-items:flex-end;margin-bottom:10px;flex-wrap:wrap}
+.leave-form-row .form-group{flex:1;min-width:120px}
+.leave-list{margin-top:16px}
+.leave-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface2);border-radius:8px;margin-bottom:4px;font-size:13px}
+.leave-item .left{display:flex;align-items:center;gap:8px}
+.leave-item .remove{color:var(--coral);cursor:pointer;font-size:16px;padding:0 4px}.leave-item .remove:hover{color:#fca5a5}
+
+/* PROJECT CARDS */
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px}
+.proj-card{border-radius:16px;overflow:hidden;background:var(--surface);border:1px solid var(--border);transition:all 0.3s;position:relative}
+.proj-card:hover{border-color:rgba(34,211,238,0.4);box-shadow:0 0 30px rgba(34,211,238,0.07),0 12px 40px rgba(0,0,0,0.4);transform:translateY(-2px)}
+.proj-card-accent{height:4px;background:linear-gradient(90deg,var(--cyan),var(--violet),var(--sky))}
+.proj-card-inner{padding:22px 24px 20px}
+.proj-status-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.proj-status{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:4px 10px;border-radius:20px}
+.proj-status.active{background:rgba(52,211,153,0.12);color:var(--mint);border:1px solid rgba(52,211,153,0.3)}
+.proj-status.active::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--mint);display:inline-block;animation:pulse 1.8s infinite}
+.proj-status.paused{background:rgba(232,185,49,0.12);color:var(--gold);border:1px solid rgba(232,185,49,0.3)}
+.proj-status.completed{background:rgba(96,165,250,0.12);color:var(--sky);border:1px solid rgba(96,165,250,0.3)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.proj-title{font-family:var(--serif);font-size:20px;font-weight:700;letter-spacing:-0.01em;margin-bottom:6px;color:var(--text)}
+.proj-subtitle{font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.5}
+.proj-meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.proj-meta-item{background:var(--surface2);border-radius:8px;padding:10px 12px}
+.proj-meta-label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.07em;font-weight:600;margin-bottom:2px}
+.proj-meta-value{font-size:13px;color:var(--text);font-weight:600}
+.proj-links-section{margin-top:14px;border-top:1px solid var(--border);padding-top:14px}
+.proj-links-title{font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px}
+.proj-link-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface2);border-radius:7px;margin-bottom:5px;text-decoration:none;transition:all 0.2s;border:1px solid transparent}
+.proj-link-item:hover{border-color:var(--border-hover);background:var(--surface3)}
+.proj-link-icon{font-size:14px;flex-shrink:0}
+.proj-link-label{font-size:12px;color:var(--cyan);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.proj-link-item:hover .proj-link-label{color:var(--text)}
+.proj-link-actions{display:flex;gap:4px;flex-shrink:0}
+.proj-link-del{color:var(--coral);cursor:pointer;font-size:12px;padding:2px 5px;border-radius:4px;opacity:0.5;background:none;border:none;transition:opacity 0.2s;line-height:1}
+.proj-link-del:hover{opacity:1;background:var(--coral-dim)}
+.proj-card-footer{padding:12px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:6px}
+.proj-card::after{content:'';position:absolute;inset:0;pointer-events:none;border-radius:16px;
+  background:radial-gradient(ellipse 70% 40% at 50% 0%,rgba(34,211,238,0.04) 0%,transparent 70%)}
+
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-dim)}
+.empty-state .icon{font-size:48px;margin-bottom:12px;opacity:0.4}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 20px;color:var(--text);font-size:13px;font-weight:500;z-index:200;transform:translateY(80px);opacity:0;transition:all 0.3s;display:flex;align-items:center;gap:8px}
+.toast.show{transform:translateY(0);opacity:1}.toast.success{border-color:var(--mint-dim);color:var(--mint)}
+
+@media(max-width:768px){
+  .hero h1{font-size:24px}.stats{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.poke-grid{grid-template-columns:1fr}.hero-row{flex-direction:column;align-items:flex-start}.proj-grid{grid-template-columns:1fr}.proj-meta-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+
+<!-- LOGIN GATE -->
+<div id="loginGate" style="display:flex;position:fixed;inset:0;z-index:999;align-items:center;justify-content:center;background:rgba(13,12,17,0.97);backdrop-filter:blur(8px)">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px 36px;width:100%;max-width:400px;animation:fadeIn 0.3s ease;text-align:center">
+    <div style="font-size:36px;margin-bottom:12px">🧠</div>
+    <h2 style="font-family:var(--serif);font-size:22px;font-weight:700;background:linear-gradient(135deg,var(--text) 0%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px">Saurabh's DS Team</h2>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:24px;line-height:1.6">Enter your Turing work email to access the hub.<br>Your access level is determined by your email.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;text-align:left">
+      <input id="loginEmail" type="email" placeholder="you@turing.com"
+        style="padding:11px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none;font-family:var(--font);transition:border-color 0.2s;width:100%"
+        onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'"
+        onkeydown="if(event.key==='Enter')doLogin()">
+      <button onclick="doLogin()"
+        style="padding:11px;background:var(--gold);color:#0d0c11;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);transition:background 0.2s;width:100%"
+        onmouseover="this.style.background='#d4a72a'" onmouseout="this.style.background='var(--gold)'">
+        Continue →
+      </button>
+      <p id="loginErr" style="font-size:12px;color:var(--coral);text-align:center;display:none;margin-top:2px;line-height:1.5"></p>
+    </div>
+    <p style="font-size:11px;color:var(--text-dim);margin-top:20px">Admins get full access · Team members can edit their own card only</p>
+  </div>
+</div>
+
+<div class="app">
+  <div class="hero"><div class="hero-row"><div><h1>Saurabh's Data Science Team</h1><p>Data Science Team Tracker &mdash; unified team sheet, availability, skills and projects.</p></div>
+    <div class="hero-actions">
+      <button class="btn" onclick="exportData()">&#8681; Export</button>
+      <button class="btn" onclick="document.getElementById('importFile').click()">&#8679; Import</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      <button class="btn btn-gold" onclick="openAddMember()">+ Add Member</button>
+      <span id="userBadge" style="display:none;align-items:center;font-size:12px;color:var(--text-muted);padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+      <button class="btn" onclick="doLogout()" title="Sign out" style="font-size:12px">&#x2715; Sign Out</button>
+    </div></div></div>
+
+  <div class="stats">
+    <div class="stat-card"><div class="stat-label">Total Members</div><div class="stat-value" id="statTotal" style="color:var(--gold)">0</div></div>
+    <div class="stat-card"><div class="stat-label">Mridul's Pod</div><div class="stat-value" id="statPod1" style="color:var(--sky)">0</div></div>
+    <div class="stat-card"><div class="stat-label">Abdul's Pod</div><div class="stat-value" id="statPod2" style="color:var(--violet)">0</div></div>
+    <div class="stat-card"><div class="stat-label">On Leave Today</div><div class="stat-value" id="statLeave" style="color:var(--coral)">0</div></div>
+  </div>
+
+  <div class="tabs" id="tabBar">
+    <button class="tab active" data-tab="cards">&#127183; Team Cards</button>
+    <button class="tab" data-tab="roster">&#9783; Roster</button>
+    <button class="tab" data-tab="availability">&#9683; Availability</button>
+    <button class="tab" data-tab="projects">&#9883; Projects</button>
+  </div>
+
+  <div class="panel visible" data-panel="cards"><div id="cardsContent"></div></div>
+  <div class="panel" data-panel="roster"><div id="rosterContent"></div></div>
+  <div class="panel" data-panel="availability">
+    <div class="cal-header"><h3 id="calMonthLabel"></h3>
+      <div class="cal-nav">
+        <button onclick="changeMonth(-1)">&#8249;</button>
+        <button onclick="openLeaveModal()" class="btn btn-sm btn-gold" style="width:auto;padding:5px 14px;font-size:12px">+ Log Leave</button>
+        <button onclick="changeMonth(1)">&#8250;</button>
+      </div>
+    </div>
+    <div class="leave-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--coral)"></div>Full Day</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>Half Day</div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div id="leavesSummary"></div>
+  </div>
+  <div class="panel" data-panel="projects"><div id="projectsContent"></div></div>
+</div>
+
+<!-- MEMBER MODAL -->
+<div class="modal-overlay" id="memberModal">
+<div class="modal">
+  <h2 id="modalTitle">Add Team Member</h2>
+  <div class="subtitle">Fill in the details below to add a team member.</div>
+  <input type="hidden" id="editId" value="">
+  <div class="photo-upload">
+    <div class="photo-preview" id="photoPreview"><span class="placeholder">&#129399;</span></div>
+    <div><button class="btn btn-sm" onclick="document.getElementById('photoInput').click()">&#128247; Upload Photo</button>
+    <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
+    <div style="font-size:11px;color:var(--text-dim);margin-top:4px">JPG/PNG, max 500KB</div></div>
+  </div>
+  <input type="hidden" id="fPhoto" value="">
+  <div class="form-grid">
+    <div class="form-group"><label>Full Name *</label><input id="fName" placeholder="e.g. Priya Sharma"></div>
+    <div class="form-group"><label>Email *</label><input id="fEmail" type="email" placeholder="priya@company.com"></div>
+    <div class="form-group"><label>Pod *</label><select id="fPod"><option value="Pod 1">Mridul's Pod</option><option value="Pod 2">Abdul's Pod</option><option value="Not Applicable">Not Applicable</option></select></div>
+    <div class="form-group"><label>Designation *</label><select id="fDesg"><option value="IC">IC (Individual Contributor)</option><option value="Pod Lead">Pod Lead</option><option value="Team Lead">Team Lead</option><option value="DM">DM (Delivery Manager)</option></select></div>
+    <div class="form-group"><label>Role / Title</label><input id="fRole" placeholder="e.g. Senior Data Scientist"></div>
+    <div class="form-group"><label>Country</label><select id="fCountry"></select></div>
+    <div class="form-group"><label>City</label><input id="fCity" placeholder="e.g. Bangalore"></div>
+    <div class="form-group"><label>Timezone</label><select id="fTimezone"><option value="IST (UTC+5:30)">IST (UTC+5:30)</option><option value="EST (UTC-5)">EST (UTC-5)</option><option value="CST (UTC-6)">CST (UTC-6)</option><option value="PST (UTC-8)">PST (UTC-8)</option><option value="GMT (UTC+0)">GMT (UTC+0)</option><option value="CET (UTC+1)">CET (UTC+1)</option><option value="BRT (UTC-3)">BRT (UTC-3)</option><option value="COT (UTC-5)">COT (UTC-5)</option><option value="PKT (UTC+5)">PKT (UTC+5)</option><option value="EAT (UTC+3)">EAT (UTC+3)</option><option value="SGT (UTC+8)">SGT (UTC+8)</option></select></div>
+    <div class="form-group"><label>Working Hours (PST)</label><input id="fHours" placeholder="e.g. 7:00 AM - 4:00 PM"></div>
+    <div class="form-group"><label>Date of Joining</label><input id="fDoj" type="date"></div>
+    <div class="form-group"><label>Total Experience</label><input id="fExp" placeholder="e.g. 5 Years"></div>
+    <div class="form-group"><label>Slack Handle</label><input id="fSlack" placeholder="@priya.sharma"></div>
+    <div class="form-group full"><label>Core Skills (comma separated)</label><input id="fSkills" placeholder="Python, ML, NLP, PyTorch, Statistics"></div>
+    <div class="form-group full"><label>Key Strengths</label><textarea id="fStrengths" placeholder="Strong in time-series forecasting..."></textarea></div>
+    <div class="form-group"><label>CV / Resume Link</label><input id="fCv" placeholder="Google Drive or URL"></div>
+    <div class="form-group"><label>Current Project</label><input id="fProject" placeholder="Colab-Bench STEM Tasks"></div>
+  </div>
+  <div class="form-actions"><button class="btn" onclick="closeMemberModal()">Cancel</button><button class="btn btn-gold" onclick="saveMember()">Save Member</button></div>
+</div></div>
+
+<!-- LEAVE MODAL -->
+<div class="modal-overlay" id="leaveModal"><div class="modal" style="max-width:520px">
+  <h2>Log Leave</h2>
+  <div class="subtitle">Record planned time off. Press Esc to close.</div>
+  <div class="leave-form-row">
+    <div class="form-group"><label>Member</label><select id="lMember"></select></div>
+    <div class="form-group"><label>Date</label><input id="lDate" type="date"></div>
+  </div>
+  <div class="leave-form-row">
+    <div class="form-group"><label>Type</label><select id="lType"><option value="leave">Full Day Leave</option><option value="half">Half Day</option></select></div>
+    <div class="form-group"><label>Note (optional)</label><input id="lNote" placeholder="Reason..."></div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-gold btn-sm" onclick="addLeave()">+ Add Entry</button></div>
+  <div class="leave-list" id="leaveList"></div>
+  <div class="form-actions"><button class="btn" onclick="closeLeaveModal()">Done</button></div>
+</div></div>
+
+<!-- PROJECT MODAL -->
+<div class="modal-overlay" id="projectModal"><div class="modal" style="max-width:580px">
+  <h2 id="projModalTitle">New Project</h2>
+  <div class="subtitle">Define a project for your team. Press Esc to close.</div>
+  <input type="hidden" id="projEditId" value="">
+  <div class="form-grid">
+    <div class="form-group full"><label>Project Name *</label><input id="pName" placeholder="e.g. Colab-Bench"></div>
+    <div class="form-group full"><label>Description</label><textarea id="pDesc" placeholder="Short description of what this project is about..."></textarea></div>
+    <div class="form-group"><label>Status</label><select id="pStatus"><option value="active">Active</option><option value="paused">Paused</option><option value="completed">Completed</option></select></div>
+    <div class="form-group"><label>Start Date</label><input id="pStart" type="date"></div>
+    <div class="form-group"><label>End Date / ETA</label><input id="pEnd" placeholder="e.g. Q3 2026 or leave blank"></div>
+    <div class="form-group"><label>Team / Owner</label><input id="pTeam" placeholder="e.g. Both Pods"></div>
+  </div>
+  <div class="form-actions"><button class="btn" onclick="closeProjectModal()">Cancel</button><button class="btn btn-gold" onclick="saveProject()">Save Project</button></div>
+</div></div>
+
+<!-- ADD LINK MODAL -->
+<div class="modal-overlay" id="addLinkModal"><div class="modal" style="max-width:460px">
+  <h2>Add Link</h2>
+  <div class="subtitle">Attach a resource link to this project.</div>
+  <input type="hidden" id="linkProjId" value="">
+  <div class="form-grid">
+    <div class="form-group full"><label>Label *</label><input id="lLinkLabel" placeholder="e.g. Agentic Vet Dashboard"></div>
+    <div class="form-group full"><label>URL *</label><input id="lLinkUrl" placeholder="https://..."></div>
+    <div class="form-group"><label>Icon (emoji, optional)</label><input id="lLinkIcon" placeholder="🔗" maxlength="4"></div>
+  </div>
+  <div class="form-actions"><button class="btn" onclick="closeAddLinkModal()">Cancel</button><button class="btn btn-gold" onclick="saveLink()">Add Link</button></div>
+</div></div>
+
+<input type="file" id="cardPhotoInput" accept="image/*" style="display:none" onchange="handleCardPhoto(event)">
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══ COUNTRIES ═══
+const COUNTRIES=[
+  {name:"India",flag:"🇮🇳",tz:"IST (UTC+5:30)"},{name:"Pakistan",flag:"🇵🇰",tz:"PKT (UTC+5)"},
+  {name:"Brazil",flag:"🇧🇷",tz:"BRT (UTC-3)"},{name:"Colombia",flag:"🇨🇴",tz:"COT (UTC-5)"},
+  {name:"Kenya",flag:"🇰🇪",tz:"EAT (UTC+3)"},{name:"United States",flag:"🇺🇸",tz:"PST (UTC-8)"},
+  {name:"United Kingdom",flag:"🇬🇧",tz:"GMT (UTC+0)"},{name:"Canada",flag:"🇨🇦",tz:"EST (UTC-5)"},
+  {name:"Germany",flag:"🇩🇪",tz:"CET (UTC+1)"},{name:"Argentina",flag:"🇦🇷",tz:"BRT (UTC-3)"},
+  {name:"Mexico",flag:"🇲🇽",tz:"CST (UTC-6)"},{name:"Philippines",flag:"🇵🇭",tz:"SGT (UTC+8)"},
+  {name:"Nigeria",flag:"🇳🇬",tz:"CET (UTC+1)"},{name:"Bangladesh",flag:"🇧🇩",tz:"IST (UTC+5:30)"},
+  {name:"Turkey",flag:"🇹🇷",tz:"EAT (UTC+3)"},{name:"Egypt",flag:"🇪🇬",tz:"EAT (UTC+3)"},
+  {name:"Ukraine",flag:"🇺🇦",tz:"CET (UTC+1)"},{name:"Poland",flag:"🇵🇱",tz:"CET (UTC+1)"},
+  {name:"Sri Lanka",flag:"🇱🇰",tz:"IST (UTC+5:30)"},{name:"Nepal",flag:"🇳🇵",tz:"IST (UTC+5:30)"},
+].sort((a,b)=>a.name.localeCompare(b.name));
+function getFlag(c){const x=COUNTRIES.find(o=>o.name===c);return x?x.flag:''}
+document.getElementById('fCountry').innerHTML='<option value="">Select country...</option>'+COUNTRIES.map(c=>'<option value="'+c.name+'">'+c.flag+' '+c.name+'</option>').join('');
+
+// ═══ SEED ═══
+const SEED_MEMBERS=[
+  {id:"p1_1",name:"David Ramírez",email:"david.r@turing.com",pod:"Pod 1",designation:"IC",role:"Senior Data Scientist",country:"Colombia",city:"",timezone:"COT (UTC-5)",hours:"7 AM - 4 PM",doj:"2026-03-19",exp:"10 Years",slack:"",skills:["RAG","Text Extraction","Supply Chain","Forecasting","Operations Research","Quant Finance","Financial Modelling","Sports Analytics"],strengths:"",cv:"",project:"Colab-Bench",photo:""},
+  {id:"p1_2",name:"Bruno Laboissiere Camargos Borges",email:"bruno.borges@turing.com",pod:"Pod 1",designation:"IC",role:"Data Scientist",country:"Brazil",city:"",timezone:"BRT (UTC-3)",hours:"",doj:"",exp:"",slack:"",skills:[],strengths:"",cv:"",project:"Colab-Bench",photo:""},
+  {id:"p1_3",name:"Sakshi Chapke",email:"sakshi.chapke@turing.com",pod:"Pod 1",designation:"IC",role:"Data Scientist",country:"India",city:"",timezone:"IST (UTC+5:30)",hours:"1:30 AM - 11:30 AM",doj:"2024-06-03",exp:"2 Years",slack:"",skills:[],strengths:"",cv:"",project:"Colab-Bench",photo:""},
+  {id:"p1_4",name:"Wasiq Noor Ahmad Qasmi",email:"wasiq.n@turing.com",pod:"Pod 1",designation:"IC",role:"Data Scientist",country:"Pakistan",city:"",timezone:"PKT (UTC+5)",hours:"7 AM - 3 PM",doj:"2026-09-04",exp:"5 Years",slack:"",skills:[],strengths:"",cv:"",project:"Colab-Bench",photo:""},
+  {id:"p1_5",name:"Mridul Garg",email:"mridul.g@turing.com",pod:"Pod 1",designation:"Pod Lead",role:"Senior Data Scientist",country:"India",city:"",timezone:"IST (UTC+5:30)",hours:"1:30 AM - 11:30 AM",doj:"2026-06-24",exp:"7 Years",slack:"",skills:["Financial Analysis","Regression","Manufacturing"],strengths:"",cv:"",project:"Colab-Bench",photo:""},
+  {id:"p2_1",name:"Harish Kumar",email:"harish.kumar@turing.com",pod:"Pod 2",designation:"IC",role:"Data Scientist",country:"India",city:"Hyderabad",timezone:"IST (UTC+5:30)",hours:"4:30 AM - 10:30 AM, 6:30 PM - 8:30 PM",doj:"2024-07-22",exp:"",slack:"",skills:["Data Visualization","Machine Learning","Python","NLP","ANN"],strengths:"",cv:"",project:"Colab-Bench",photo:""},
+  {id:"p2_2",name:"Roman Lanzillotta",email:"roman.l@turing.com",pod:"Pod 2",designation:"IC",role:"Data Scientist",country:"Argentina",city:"",timezone:"BRT (UTC-3)",hours:"",doj:"",exp:"",slack:"",skills:[],strengths:"",cv:"",project:"Colab-Bench",photo:""},
+  {id:"p2_3",name:"Sergio Marinho da Silva",email:"sergio.m@turing.com",pod:"Pod 2",designation:"IC",role:"Data Scientist",country:"Brazil",city:"São Paulo",timezone:"BRT (UTC-3)",hours:"4:30 AM - 1:30 PM",doj:"2024-05-01",exp:"",slack:"",skills:["Docker","SQL","Python","Data Analysis","Data Science"],strengths:"Mainly data analysis and data science skills",cv:"",project:"Colab-Bench",photo:""},
+  {id:"p2_4",name:"Imroze Aslam Malik",email:"imroze.m@turing.com",pod:"Pod 2",designation:"IC",role:"Data Scientist",country:"Pakistan",city:"Lahore",timezone:"PKT (UTC+5)",hours:"12:00 AM - 5:00 AM, 8:30 AM - 11:30 AM",doj:"2026-04-09",exp:"",slack:"",skills:["Machine Learning","Generative AI","Agentic AI","Deep Learning","Computer Vision","NLP","Statistics","Time-Series","Reinforcement Learning"],strengths:"",cv:"",project:"Colab-Bench",photo:""},
+  {id:"p2_5",name:"Beka M",email:"beka.m@turing.com",pod:"Pod 2",designation:"IC",role:"Data Scientist",country:"Kenya",city:"Nairobi",timezone:"EAT (UTC+3)",hours:"5:00 AM - 1:00 PM",doj:"2026-04-09",exp:"",slack:"",skills:["Machine Learning","Deep Learning","NLP","Data Visualization","Reinforcement Learning","Python"],strengths:"",cv:"",project:"Colab-Bench",photo:""},
+];
+const SEED_LEAVES=[
+  {id:"sl1",memberId:"p1_1",date:"2026-05-01",type:"leave",note:""},{id:"sl2",memberId:"p1_2",date:"2026-04-13",type:"leave",note:""},
+  {id:"sl3",memberId:"p1_2",date:"2026-04-14",type:"leave",note:""},{id:"sl4",memberId:"p1_2",date:"2026-04-15",type:"leave",note:""},
+  {id:"sl5",memberId:"p1_2",date:"2026-04-16",type:"leave",note:""},{id:"sl6",memberId:"p1_2",date:"2026-04-17",type:"leave",note:""},
+  {id:"sl7",memberId:"p1_2",date:"2026-04-20",type:"leave",note:""},{id:"sl8",memberId:"p1_2",date:"2026-04-21",type:"leave",note:""},
+  {id:"sl9",memberId:"p1_2",date:"2026-04-22",type:"leave",note:""},{id:"sl10",memberId:"p1_2",date:"2026-04-23",type:"leave",note:""},
+  {id:"sl11",memberId:"p1_2",date:"2026-04-24",type:"leave",note:""},{id:"sl12",memberId:"p1_2",date:"2026-04-27",type:"leave",note:""},
+  {id:"sl13",memberId:"p1_2",date:"2026-05-01",type:"leave",note:""},{id:"sl14",memberId:"p1_3",date:"2026-04-13",type:"leave",note:""},
+  {id:"sl15",memberId:"p1_3",date:"2026-05-01",type:"leave",note:""},{id:"sl16",memberId:"p2_1",date:"2026-04-16",type:"leave",note:""},
+];
+const SEED_PROJECTS=[{
+  id:"proj_1",name:"Colab-Bench",
+  description:"Advanced AI agent evaluation framework using interactive Jupyter environments. Creates PhD-level STEM benchmark tasks to assess long-horizon, stateful reasoning across Physics, Biology, Math and computational ML.",
+  status:"active",startDate:"2026-03-13",endDate:"",team:"Both Pods",
+  links:[
+    {id:"lnk_1",label:"Guidelines Document",url:"https://docs.google.com/document/d/1-BS_zMnGXfhPHksee1P1WjMc5XYUvGFxE2EJ1pNwfIM/edit",icon:"📄"},
+    {id:"lnk_2",label:"Colab Bench Tracker",url:"https://docs.google.com/spreadsheets/d/1_1kd5JZWUuXLGw1ykZHojJuwSZP0PFT9Mb5t2ViwQx0/edit?gid=904204622#gid=904204622",icon:"📊"},
+    {id:"lnk_3",label:"Agentic Vet — Current Batch",url:"https://gdm-agentic-vet.turing.com/datasets/8274",icon:"🤖"},
+    {id:"lnk_4",label:"AV Zip Files (GDrive)",url:"https://drive.google.com/drive/folders/1KuCcRCXIdEfaSeCApNh7EvyYMm3eqcHJ",icon:"📦"},
+    {id:"lnk_5",label:"AV Run Output Files (GDrive)",url:"https://drive.google.com/drive/folders/1O4d0Tp12OrlwmOtMdKxuPWqKpyFCpczh",icon:"📂"},
+    {id:"lnk_6",label:"Onboarding Recording — Apr 15 2026",url:"https://drive.google.com/file/d/1xnfN80BeYoh7fVBEJoazo5M-bQZydIAC/view",icon:"🎬"},
+    {id:"lnk_7",label:"Optimised Approach — Mar 19 2026",url:"https://drive.google.com/file/d/11mYiIMUBpObCU-QFsc1eVdn1MHg3Onme/view",icon:"🎬"},
+  ]
+}];
+
+// ═══ STATE ═══
+let members=[],leaves=[],projects=[],calYear,calMonth,cardPhotoTarget=null;
+const COLORS=['#e8b931','#34d399','#60a5fa','#a78bfa','#f97066','#fb7185','#38bdf8','#a3e635','#f472b6','#818cf8'];
+const TAG_COLORS=['tag-gold','tag-mint','tag-sky','tag-violet','tag-coral'];
+function getColor(n){let h=0;for(let i=0;i<n.length;i++)h=n.charCodeAt(i)+((h<<5)-h);return COLORS[Math.abs(h)%COLORS.length]}
+function genId(){return '_'+Math.random().toString(36).substr(2,9)}
+function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function desgLabel(d){return{IC:'IC',['Pod Lead']:'Pod Lead',['Team Lead']:'Team Lead',DM:'DM'}[d]||'IC'}
+function desgClass(d){return{IC:'desg-ic',['Pod Lead']:'desg-pl',['Team Lead']:'desg-tl',DM:'desg-dm'}[d]||'desg-ic'}
+function podLabel(p){return p==='Pod 1'?"Mridul's Pod":p==='Pod 2'?"Abdul's Pod":p||'—'}
+function podCls(p){return p==='Pod 1'?'pod1':p==='Pod 2'?'pod2':'pod-na'}
+function podTagCls(p){return p==='Pod 1'?'tag-pod1':p==='Pod 2'?'tag-pod2':'tag-na'}
+function podColor(p){return p==='Pod 1'?'var(--sky)':p==='Pod 2'?'var(--violet)':'var(--text-muted)'}
+function podBg(p){return p==='Pod 1'?'rgba(96,165,250,0.15)':p==='Pod 2'?'rgba(167,139,250,0.15)':'rgba(107,103,128,0.12)'}
+
+// ═══ PERSISTENCE ═══
+function saveState(){try{localStorage.setItem('th_m',JSON.stringify(members));localStorage.setItem('th_l',JSON.stringify(leaves));localStorage.setItem('th_p',JSON.stringify(projects))}catch(e){}}
+function loadState(){
+  try{
+    const m=localStorage.getItem('th_m'),l=localStorage.getItem('th_l'),p=localStorage.getItem('th_p');
+    if(m&&JSON.parse(m).length>0){members=JSON.parse(m);leaves=l?JSON.parse(l):[];projects=p?JSON.parse(p):JSON.parse(JSON.stringify(SEED_PROJECTS));return}
+  }catch(e){}
+  members=JSON.parse(JSON.stringify(SEED_MEMBERS));leaves=JSON.parse(JSON.stringify(SEED_LEAVES));projects=JSON.parse(JSON.stringify(SEED_PROJECTS));saveState();
+}
+
+// ═══ ESC KEY ═══
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));renderCalendar();updateStats();}
+});
+
+// ═══ TABS ═══
+document.getElementById('tabBar').addEventListener('click',function(e){
+  if(!e.target.classList.contains('tab'))return;
+  this.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  e.target.classList.add('active');
+  const tab=e.target.getAttribute('data-tab');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('visible',p.getAttribute('data-panel')===tab));
+});
+
+// ═══ STATS ═══
+function updateStats(){
+  document.getElementById('statTotal').textContent=members.length;
+  document.getElementById('statPod1').textContent=members.filter(m=>m.pod==='Pod 1').length;
+  document.getElementById('statPod2').textContent=members.filter(m=>m.pod==='Pod 2').length;
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('statLeave').textContent=leaves.filter(l=>l.date===today&&l.type==='leave').length;
+}
+
+// ═══ TEAM CARDS ═══
+function renderCards(){
+  const c=document.getElementById('cardsContent');
+  if(!members.length){c.innerHTML='<div class="empty-state"><div class="icon">&#128101;</div><p>No team members yet.</p><button class="btn btn-gold" onclick="openAddMember()">+ Add Member</button></div>';return}
+  let html='<div class="poke-grid">';
+  members.forEach(m=>{
+    const col=getColor(m.name),flag=getFlag(m.country);
+    const pCls=podCls(m.pod),pColor=podColor(m.pod),pBg=podBg(m.pod);
+    const doj=m.doj?new Date(m.doj+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'—';
+    const photoHtml=m.photo?'<img src="'+m.photo+'" alt="">':'<span class="ninja-default">&#129399;</span>';
+    html+='<div class="poke-card '+pCls+'">';
+    html+='<div class="poke-card-top"><div class="poke-card-header"><span class="name">'+esc(m.name)+'</span><span class="pod-badge" style="background:'+pBg+';color:'+pColor+'">'+podLabel(m.pod)+'</span></div>';
+    html+='<div class="poke-avatar-row"><div class="poke-avatar" style="border-color:'+col+'">'+photoHtml+'</div>';
+    html+='<div style="position:relative"><div class="poke-photo-btn" onclick="triggerCardPhoto(\''+m.id+'\')">&#128247;</div></div>';
+    html+='<div class="poke-meta"><div class="desg '+desgClass(m.designation)+'" style="margin-bottom:2px">'+desgLabel(m.designation)+'</div>';
+    html+='<div class="role">'+esc(m.role||'Data Scientist')+'</div>';
+    html+='<div class="loc">';if(flag)html+='<span class="flag">'+flag+'</span>';html+=esc((m.city?m.city+', ':'')+m.country||'—')+'</div>';
+    html+='</div></div></div>';
+    html+='<div class="poke-card-body"><div class="poke-stat-row">';
+    html+='<div class="poke-stat"><div class="val" style="color:var(--gold)">'+esc(m.exp||'—')+'</div><div class="lbl">Experience</div></div>';
+    html+='<div class="poke-stat"><div class="val" style="color:var(--sky)">'+esc(m.hours?m.hours.split(',')[0].split('-')[0].trim():'—')+'</div><div class="lbl">Start (PST)</div></div>';
+    html+='<div class="poke-stat"><div class="val" style="color:var(--mint);font-size:12px;letter-spacing:-0.02em">'+doj+'</div><div class="lbl">Joined</div></div>';
+    html+='</div>';
+    if(m.skills&&m.skills.length){html+='<div class="poke-skills"><div class="poke-skills-label">Skills</div><div class="poke-skills-tags">';m.skills.slice(0,8).forEach((s,i)=>{html+='<span class="tag '+TAG_COLORS[i%TAG_COLORS.length]+'">'+esc(s)+'</span>'});if(m.skills.length>8)html+='<span class="tag" style="color:var(--text-dim);background:var(--surface3)">+'+(m.skills.length-8)+' more</span>';html+='</div></div>';}
+    html+='</div>';
+    const canEdit=canEditMember(m.id);
+    const editBtn=canEdit?'<button class="btn btn-sm" onclick="editMember(\''+m.id+'\')" title="Edit">&#9998;</button>':'';
+    const delBtn=isAdmin()?'<button class="btn btn-sm btn-danger" onclick="deleteMember(\''+m.id+'\')" title="Remove">&#10005;</button>':'';
+    html+='<div class="poke-card-footer"><span class="email">'+esc(m.email)+'</span><div class="actions">'+editBtn+delBtn+'</div></div>';
+    html+='</div>';
+  });
+  html+='</div>';c.innerHTML=html;
+}
+function triggerCardPhoto(id){cardPhotoTarget=id;document.getElementById('cardPhotoInput').click()}
+function handleCardPhoto(e){const file=e.target.files[0];if(!file||!cardPhotoTarget)return;const r=new FileReader();r.onload=function(ev){const m=members.find(x=>x.id===cardPhotoTarget);if(m){m.photo=ev.target.result;saveState();renderAll();showToast('Photo updated!',true)}};r.readAsDataURL(file);e.target.value='';}
+
+// ═══ ROSTER ═══
+function renderRoster(){
+  const c=document.getElementById('rosterContent');
+  if(!members.length){c.innerHTML='<div class="empty-state"><div class="icon">&#128101;</div><p>No team members yet.</p></div>';return}
+  let html='<div class="table-wrap"><table><thead><tr><th>Member</th><th>Pod</th><th>Designation</th><th>Country</th><th>Hours (PST)</th><th>Joined</th><th style="width:80px"></th></tr></thead><tbody>';
+  members.forEach(m=>{
+    const col=getColor(m.name),flag=getFlag(m.country);
+    const doj=m.doj?new Date(m.doj+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'—';
+    const photoHtml=m.photo?'<img src="'+m.photo+'" alt="">':'<span style="font-size:18px">&#129399;</span>';
+    html+='<tr><td><div class="member-cell"><div class="avatar" style="background:'+col+'22;color:'+col+'">'+photoHtml+'</div><div><div class="member-name">'+esc(m.name)+'</div><div class="member-email">'+esc(m.email)+'</div></div></div></td>';
+    html+='<td><span class="tag '+podTagCls(m.pod)+'">'+podLabel(m.pod)+'</span></td>';
+    html+='<td><span class="'+desgClass(m.designation)+'" style="font-weight:600;font-size:12px">'+desgLabel(m.designation)+'</span></td>';
+    html+='<td style="color:var(--text-muted);font-size:12px">'+flag+' '+esc(m.country||'—')+'</td>';
+    html+='<td style="color:var(--text-muted);font-size:12px">'+esc(m.hours||'—')+'</td>';
+    html+='<td style="color:var(--text-dim);font-size:12px">'+doj+'</td>';
+    const canEdit2=canEditMember(m.id);
+    const rEditBtn=canEdit2?'<button class="btn btn-sm" onclick="editMember(\''+m.id+'\')" style="margin-right:4px">&#9998;</button>':'';
+    const rDelBtn=isAdmin()?'<button class="btn btn-sm btn-danger" onclick="deleteMember(\''+m.id+'\')">&#10005;</button>':'';
+    html+='<td>'+rEditBtn+rDelBtn+'</td></tr>';
+  });
+  html+='</tbody></table></div>';c.innerHTML=html;
+}
+
+// ═══ MEMBER MODAL ═══
+function openAddMember(){document.getElementById('modalTitle').textContent='Add Team Member';document.getElementById('editId').value='';document.getElementById('fPhoto').value='';['fName','fEmail','fRole','fCity','fHours','fDoj','fExp','fSlack','fSkills','fStrengths','fCv','fProject'].forEach(id=>document.getElementById(id).value='');document.getElementById('fPod').value='Pod 1';document.getElementById('fDesg').value='IC';document.getElementById('fCountry').value='';document.getElementById('fTimezone').value='IST (UTC+5:30)';document.getElementById('photoPreview').innerHTML='<span class="placeholder">&#129399;</span>';document.getElementById('memberModal').classList.add('open')}
+function editMember(id){const m=members.find(x=>x.id===id);if(!m)return;document.getElementById('modalTitle').textContent='Edit Member';document.getElementById('editId').value=id;document.getElementById('fName').value=m.name||'';document.getElementById('fEmail').value=m.email||'';document.getElementById('fPod').value=m.pod||'Pod 1';document.getElementById('fDesg').value=m.designation||'IC';document.getElementById('fRole').value=m.role||'';document.getElementById('fCountry').value=m.country||'';document.getElementById('fCity').value=m.city||'';document.getElementById('fTimezone').value=m.timezone||'IST (UTC+5:30)';document.getElementById('fHours').value=m.hours||'';document.getElementById('fDoj').value=m.doj||'';document.getElementById('fExp').value=m.exp||'';document.getElementById('fSlack').value=m.slack||'';document.getElementById('fSkills').value=(m.skills||[]).join(', ');document.getElementById('fStrengths').value=m.strengths||'';document.getElementById('fCv').value=m.cv||'';document.getElementById('fProject').value=m.project||'';document.getElementById('fPhoto').value=m.photo||'';document.getElementById('photoPreview').innerHTML=m.photo?'<img src="'+m.photo+'" alt="">':'<span class="placeholder">&#129399;</span>';document.getElementById('memberModal').classList.add('open')}
+function closeMemberModal(){document.getElementById('memberModal').classList.remove('open')}
+function handlePhotoUpload(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=function(ev){document.getElementById('fPhoto').value=ev.target.result;document.getElementById('photoPreview').innerHTML='<img src="'+ev.target.result+'" alt="">';};r.readAsDataURL(file);e.target.value='';}
+function saveMember(){const name=document.getElementById('fName').value.trim(),email=document.getElementById('fEmail').value.trim();if(!name||!email){showToast('Name and Email are required.');return}const data={name,email,pod:document.getElementById('fPod').value,designation:document.getElementById('fDesg').value,role:document.getElementById('fRole').value.trim(),country:document.getElementById('fCountry').value,city:document.getElementById('fCity').value.trim(),timezone:document.getElementById('fTimezone').value,hours:document.getElementById('fHours').value.trim(),doj:document.getElementById('fDoj').value,exp:document.getElementById('fExp').value.trim(),slack:document.getElementById('fSlack').value.trim(),skills:document.getElementById('fSkills').value.split(',').map(s=>s.trim()).filter(Boolean),strengths:document.getElementById('fStrengths').value.trim(),cv:document.getElementById('fCv').value.trim(),project:document.getElementById('fProject').value.trim(),photo:document.getElementById('fPhoto').value};const editId=document.getElementById('editId').value;if(editId){const idx=members.findIndex(m=>m.id===editId);if(idx>=0)members[idx]={...members[idx],...data}}else{data.id=genId();members.push(data)}saveState();renderAll();closeMemberModal();showToast(editId?'Member updated!':'Member added!',true);}
+function deleteMember(id){if(!confirm('Remove this team member?'))return;members=members.filter(m=>m.id!==id);leaves=leaves.filter(l=>l.memberId!==id);saveState();renderAll();showToast('Member removed.',true)}
+
+// ═══ CALENDAR ═══
+function initCalendar(){const n=new Date();calYear=n.getFullYear();calMonth=n.getMonth();renderCalendar()}
+function changeMonth(d){calMonth+=d;if(calMonth>11){calMonth=0;calYear++}if(calMonth<0){calMonth=11;calYear--}renderCalendar()}
+function renderCalendar(){
+  const mNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calMonthLabel').textContent=mNames[calMonth]+' '+calYear;
+  const grid=document.getElementById('calGrid'),days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  let html=days.map(d=>'<div class="cal-day-header">'+d+'</div>').join('');
+  const firstDay=new Date(calYear,calMonth,1).getDay(),dim=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date(),todayStr=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+  for(let i=0;i<firstDay;i++)html+='<div class="cal-cell empty"></div>';
+  for(let d=1;d<=dim;d++){
+    const ds=calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const dow=new Date(calYear,calMonth,d).getDay(),isToday=ds===todayStr,isWe=dow===0||dow===6;
+    const dl=leaves.filter(l=>l.date===ds);
+    let cls='cal-cell';if(isToday)cls+=' today';if(isWe)cls+=' weekend';
+    html+='<div class="'+cls+'" onclick="openLeaveForDate(\''+ds+'\')">';
+    html+='<div class="cal-date">'+d+'</div>';
+    dl.slice(0,3).forEach(l=>{const m=members.find(x=>x.id===l.memberId);html+='<span class="cal-leave '+l.type+'">'+esc(m?m.name.split(' ')[0]:'?')+'</span>'});
+    if(dl.length>3)html+='<span style="font-size:9px;color:var(--text-dim)">+'+(dl.length-3)+'</span>';
+    html+='</div>';
+  }
+  grid.innerHTML=html;renderLeavesSummary();
+}
+function renderLeavesSummary(){
+  const ml=leaves.filter(l=>{const d=new Date(l.date+'T00:00:00');return d.getMonth()===calMonth&&d.getFullYear()===calYear});
+  const c=document.getElementById('leavesSummary');
+  if(!ml.length){c.innerHTML='<div style="text-align:center;padding:24px;color:var(--text-dim);font-size:13px">No leaves logged for this month.</div>';return}
+  const g={};ml.forEach(l=>{if(!g[l.memberId])g[l.memberId]=[];g[l.memberId].push(l)});
+  let html='<div style="margin-top:20px"><h3 style="font-family:var(--serif);font-size:16px;color:var(--text);margin-bottom:12px">Monthly Summary</h3><div class="table-wrap"><table><thead><tr><th>Member</th><th>Full Days</th><th>Half Days</th><th>Total Off</th></tr></thead><tbody>';
+  Object.keys(g).forEach(mid=>{const m=members.find(x=>x.id===mid);if(!m)return;const ls=g[mid];const full=ls.filter(l=>l.type==='leave').length,half=ls.filter(l=>l.type==='half').length;html+='<tr><td style="font-weight:600">'+esc(m.name)+'</td><td>'+full+'</td><td>'+half+'</td><td style="font-weight:700;color:var(--coral)">'+(full+half*0.5)+'</td></tr>'});
+  html+='</tbody></table></div></div>';c.innerHTML=html;
+}
+
+// ═══ LEAVE MODAL ═══
+function openLeaveModal(){populateMemberSelect();document.getElementById('lDate').value='';document.getElementById('lType').value='leave';document.getElementById('lNote').value='';renderLeaveList();document.getElementById('leaveModal').classList.add('open')}
+function openLeaveForDate(ds){populateMemberSelect();document.getElementById('lDate').value=ds;document.getElementById('lType').value='leave';document.getElementById('lNote').value='';renderLeaveList();document.getElementById('leaveModal').classList.add('open')}
+function closeLeaveModal(){document.getElementById('leaveModal').classList.remove('open');renderCalendar();updateStats()}
+function populateMemberSelect(){document.getElementById('lMember').innerHTML=members.map(m=>'<option value="'+m.id+'">'+esc(m.name)+' ('+podLabel(m.pod)+')</option>').join('')}
+function addLeave(){const mid=document.getElementById('lMember').value,date=document.getElementById('lDate').value,type=document.getElementById('lType').value,note=document.getElementById('lNote').value.trim();if(!mid||!date){showToast('Select a member and date.');return}if(leaves.some(l=>l.memberId===mid&&l.date===date&&l.type===type)){showToast('Entry already exists.');return}leaves.push({id:genId(),memberId:mid,date,type,note});saveState();document.getElementById('lNote').value='';renderLeaveList();showToast('Leave added!',true);}
+function removeLeave(id){leaves=leaves.filter(l=>l.id!==id);saveState();renderLeaveList()}
+function renderLeaveList(){
+  const c=document.getElementById('leaveList');
+  const ml=leaves.filter(l=>{const d=new Date(l.date+'T00:00:00');return d.getMonth()===calMonth&&d.getFullYear()===calYear}).sort((a,b)=>a.date.localeCompare(b.date));
+  if(!ml.length){c.innerHTML='<div style="padding:16px;text-align:center;color:var(--text-dim);font-size:13px">No entries yet.</div>';return}
+  let html='';ml.forEach(l=>{const m=members.find(x=>x.id===l.memberId),tl=l.type==='leave'?'Full Day':'Half Day',tc=l.type==='leave'?'tag-coral':'tag-gold';const dd=new Date(l.date+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'});html+='<div class="leave-item"><div class="left"><span style="color:var(--text-muted);font-size:12px;width:50px">'+dd+'</span><strong>'+esc(m?m.name.split(' ')[0]:'?')+'</strong><span class="tag '+tc+'">'+tl+'</span>';if(l.note)html+='<span style="color:var(--text-dim);font-size:11px">'+esc(l.note)+'</span>';html+='</div><span class="remove" onclick="removeLeave(\''+l.id+'\')">&times;</span></div>'});
+  c.innerHTML=html;
+}
+
+// ═══ PROJECTS ═══
+function renderProjects(){
+  const c=document.getElementById('projectsContent');
+  if(!projects.length){c.innerHTML='<div class="empty-state"><div class="icon">🚀</div><p>No projects yet.</p><button class="btn btn-cyan" onclick="openAddProject()">+ New Project</button></div>';return}
+  let html='<div style="display:flex;justify-content:flex-end;margin-bottom:18px"><button class="btn btn-cyan" onclick="openAddProject()">+ New Project</button></div><div class="proj-grid">';
+  projects.forEach(p=>{
+    const sd=p.startDate?new Date(p.startDate+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'—';
+    const statusLabel={active:'Active',paused:'Paused',completed:'Completed'}[p.status]||'Active';
+    html+='<div class="proj-card"><div class="proj-card-accent"></div><div class="proj-card-inner">';
+    html+='<div class="proj-status-row"><span class="proj-status '+p.status+'">'+statusLabel+'</span>';
+    html+='<span style="font-size:11px;color:var(--text-dim);font-family:var(--mono)">Since '+sd+'</span></div>';
+    html+='<div class="proj-title">'+esc(p.name)+'</div>';
+    if(p.description)html+='<div class="proj-subtitle">'+esc(p.description)+'</div>';
+    html+='<div class="proj-meta-grid">';
+    if(p.team)html+='<div class="proj-meta-item"><div class="proj-meta-label">Team</div><div class="proj-meta-value">'+esc(p.team)+'</div></div>';
+    if(p.endDate)html+='<div class="proj-meta-item"><div class="proj-meta-label">ETA / End</div><div class="proj-meta-value">'+esc(p.endDate)+'</div></div>';
+    html+='</div>';
+    if(p.links&&p.links.length){html+='<div class="proj-links-section"><div class="proj-links-title">🔗 Resources</div>';
+      p.links.forEach(lnk=>{html+='<a class="proj-link-item" href="'+esc(lnk.url)+'" target="_blank" rel="noopener"><span class="proj-link-icon">'+(lnk.icon||'🔗')+'</span><span class="proj-link-label">'+esc(lnk.label)+'</span><div class="proj-link-actions" onclick="event.preventDefault();event.stopPropagation()"><button class="proj-link-del" onclick="deleteLink(\''+p.id+'\',\''+lnk.id+'\')">✕</button></div></a>';});
+      html+='</div>';}
+    html+='<div style="margin-top:10px"><button class="btn btn-sm" style="color:var(--cyan);border-color:rgba(34,211,238,0.25);font-size:11px" onclick="openAddLinkModal(\''+p.id+'\')">+ Add Link</button></div>';
+    html+='</div><div class="proj-card-footer"><button class="btn btn-sm" onclick="editProject(\''+p.id+'\')">&#9998; Edit</button><button class="btn btn-sm btn-danger" onclick="deleteProject(\''+p.id+'\')">&#10005;</button></div></div>';
+  });
+  html+='</div>';c.innerHTML=html;
+}
+function openAddProject(){document.getElementById('projModalTitle').textContent='New Project';document.getElementById('projEditId').value='';['pName','pDesc','pEnd','pTeam'].forEach(id=>document.getElementById(id).value='');document.getElementById('pStatus').value='active';document.getElementById('pStart').value='';document.getElementById('projectModal').classList.add('open')}
+function editProject(id){const p=projects.find(x=>x.id===id);if(!p)return;document.getElementById('projModalTitle').textContent='Edit Project';document.getElementById('projEditId').value=id;document.getElementById('pName').value=p.name||'';document.getElementById('pDesc').value=p.description||'';document.getElementById('pStatus').value=p.status||'active';document.getElementById('pStart').value=p.startDate||'';document.getElementById('pEnd').value=p.endDate||'';document.getElementById('pTeam').value=p.team||'';document.getElementById('projectModal').classList.add('open')}
+function closeProjectModal(){document.getElementById('projectModal').classList.remove('open')}
+function saveProject(){const name=document.getElementById('pName').value.trim();if(!name){showToast('Project name is required.');return}const data={name,description:document.getElementById('pDesc').value.trim(),status:document.getElementById('pStatus').value,startDate:document.getElementById('pStart').value,endDate:document.getElementById('pEnd').value.trim(),team:document.getElementById('pTeam').value.trim()};const editId=document.getElementById('projEditId').value;if(editId){const idx=projects.findIndex(p=>p.id===editId);if(idx>=0)projects[idx]={...projects[idx],...data}}else{data.id=genId();data.links=[];projects.push(data)}saveState();renderProjects();closeProjectModal();showToast(editId?'Project updated!':'Project added!',true);}
+function deleteProject(id){if(!confirm('Remove this project?'))return;projects=projects.filter(p=>p.id!==id);saveState();renderProjects();showToast('Project removed.',true)}
+function openAddLinkModal(projId){document.getElementById('linkProjId').value=projId;['lLinkLabel','lLinkUrl','lLinkIcon'].forEach(id=>document.getElementById(id).value='');document.getElementById('addLinkModal').classList.add('open')}
+function closeAddLinkModal(){document.getElementById('addLinkModal').classList.remove('open')}
+function saveLink(){const label=document.getElementById('lLinkLabel').value.trim(),url=document.getElementById('lLinkUrl').value.trim();if(!label||!url){showToast('Label and URL are required.');return}const icon=document.getElementById('lLinkIcon').value.trim()||'🔗';const projId=document.getElementById('linkProjId').value;const p=projects.find(x=>x.id===projId);if(!p)return;if(!p.links)p.links=[];p.links.push({id:genId(),label,url,icon});saveState();renderProjects();closeAddLinkModal();showToast('Link added!',true);}
+function deleteLink(projId,linkId){const p=projects.find(x=>x.id===projId);if(!p)return;p.links=p.links.filter(l=>l.id!==linkId);saveState();renderProjects();showToast('Link removed.',true)}
+
+// ═══ EXPORT/IMPORT ═══
+function exportData(){const data=JSON.stringify({members,leaves,projects,exportedAt:new Date().toISOString()},null,2);const blob=new Blob([data],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='teamhub_'+new Date().toISOString().split('T')[0]+'.json';a.click();URL.revokeObjectURL(url);showToast('Exported!',true)}
+function importData(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=function(ev){try{const d=JSON.parse(ev.target.result);if(d.members)members=d.members;if(d.leaves)leaves=d.leaves;if(d.projects)projects=d.projects;saveState();renderAll();showToast('Imported! '+members.length+' members.',true)}catch(err){showToast('Invalid JSON.')}};r.readAsText(file);e.target.value='';}
+
+function showToast(msg,ok){const t=document.getElementById('toast');t.textContent=(ok?'✓ ':'⚠ ')+msg;t.className='toast show'+(ok?' success':'');setTimeout(()=>t.className='toast',2500)}
+function renderAll(){updateStats();renderCards();renderRoster();renderCalendar();renderProjects()}
+
+// ═══ ACCESS CONTROL ═══
+const ADMIN_EMAILS = [
+  'atul.nayyar@turing.com',
+  'saurabh.choudhary@turing.com',
+  'shivank.d@turing.com',
+  'mridul.g@turing.com'
+];
+
+let currentUser = null; // { email, name }
+
+function isAdmin() {
+  return currentUser && ADMIN_EMAILS.includes(currentUser.email.toLowerCase());
+}
+function canEditMember(memberId) {
+  if (isAdmin()) return true;
+  const m = members.find(x => x.id === memberId);
+  return m && currentUser && m.email.toLowerCase() === currentUser.email.toLowerCase();
+}
+
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const errEl = document.getElementById('loginErr');
+  if (!email) { showLoginError('Please enter your email.'); return; }
+  if (!email.endsWith('@turing.com')) { showLoginError('Please use your @turing.com work email.'); return; }
+  const knownMember = members.find(m => m.email.toLowerCase() === email);
+  const isAdminEmail = ADMIN_EMAILS.includes(email);
+  if (!knownMember && !isAdminEmail) {
+    showLoginError('Email not recognised. Check you\'ve entered your Turing email correctly, or ask an admin to add you first.');
+    return;
+  }
+  const name = knownMember ? knownMember.name : email.split('@')[0];
+  currentUser = { email, name };
+  sessionStorage.setItem('th_user_email', email);
+  sessionStorage.setItem('th_user_name', name);
+  document.getElementById('loginGate').style.display = 'none';
+  errEl.style.display = 'none';
+  applyAccessUI();
+  updateUserBadge();
+}
+
+function showLoginError(msg) {
+  const el = document.getElementById('loginErr');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function applyAccessUI() {
+  const addMemberBtn = document.querySelector('[onclick="openAddMember()"]');
+  if (addMemberBtn) addMemberBtn.style.display = isAdmin() ? '' : 'none';
+  renderAll();
+}
+
+function updateUserBadge() {
+  const badge = document.getElementById('userBadge');
+  if (!badge || !currentUser) return;
+  const roleLabel = isAdmin()
+    ? '<span style="color:var(--gold);font-size:10px;margin-left:4px">Admin</span>'
+    : '<span style="color:var(--text-dim);font-size:10px;margin-left:4px">Member</span>';
+  badge.innerHTML = '👤 <span style="vertical-align:middle">' + esc(currentUser.name) + '</span>' + roleLabel;
+  badge.style.display = 'inline-flex';
+}
+
+function doLogout() {
+  currentUser = null;
+  sessionStorage.removeItem('th_user_email');
+  sessionStorage.removeItem('th_user_name');
+  document.getElementById('loginGate').style.display = 'flex';
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginErr').style.display = 'none';
+  document.getElementById('userBadge').style.display = 'none';
+  document.getElementById('userBadge').innerHTML = '';
+}
+
+function checkSessionRestore() {
+  const email = sessionStorage.getItem('th_user_email');
+  if (email) {
+    currentUser = {
+      email,
+      name: sessionStorage.getItem('th_user_name') || email
+    };
+    document.getElementById('loginGate').style.display = 'none';
+    applyAccessUI();
+    updateUserBadge();
+    return true;
+  }
+  return false;
+}
+
+loadState(); initCalendar(); renderAll(); checkSessionRestore();
+
+// ═══ ANIMATED NEURAL NETWORK BACKGROUND ═══
+(function(){
+  const canvas=document.getElementById('bgCanvas');
+  const ctx=canvas.getContext('2d');
+  let W,H,nodes,raf;
+  const NODE_COUNT=55,CONNECT_DIST=180,COLORS_BG=['#60a5fa','#a78bfa','#22d3ee','#818cf8','#34d399'];
+
+  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;if(nodes)nodes.forEach(n=>{n.x=Math.random()*W;n.y=Math.random()*H})}
+
+  function init(){
+    W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;
+    nodes=Array.from({length:NODE_COUNT},()=>({
+      x:Math.random()*W,y:Math.random()*H,
+      vx:(Math.random()-0.5)*0.28,vy:(Math.random()-0.5)*0.28,
+      r:Math.random()*1.8+1,
+      color:COLORS_BG[Math.floor(Math.random()*COLORS_BG.length)],
+      pulse:Math.random()*Math.PI*2
+    }));
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // Subtle radial glow layers
+    const g1=ctx.createRadialGradient(W*0.1,H*0.05,0,W*0.1,H*0.05,W*0.55);
+    g1.addColorStop(0,'rgba(96,165,250,0.045)');g1.addColorStop(1,'transparent');
+    ctx.fillStyle=g1;ctx.fillRect(0,0,W,H);
+    const g2=ctx.createRadialGradient(W*0.9,H*0.95,0,W*0.9,H*0.95,W*0.5);
+    g2.addColorStop(0,'rgba(167,139,250,0.04)');g2.addColorStop(1,'transparent');
+    ctx.fillStyle=g2;ctx.fillRect(0,0,W,H);
+
+    const t=Date.now()*0.001;
+    // Update nodes
+    nodes.forEach(n=>{
+      n.x+=n.vx;n.y+=n.vy;n.pulse+=0.018;
+      if(n.x<-20)n.x=W+20;if(n.x>W+20)n.x=-20;
+      if(n.y<-20)n.y=H+20;if(n.y>H+20)n.y=-20;
+    });
+    // Draw edges
+    for(let i=0;i<nodes.length;i++){
+      for(let j=i+1;j<nodes.length;j++){
+        const dx=nodes[i].x-nodes[j].x,dy=nodes[i].y-nodes[j].y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<CONNECT_DIST){
+          const alpha=(1-dist/CONNECT_DIST)*0.18;
+          ctx.beginPath();ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(nodes[j].x,nodes[j].y);
+          ctx.strokeStyle='rgba(96,165,250,'+alpha+')';ctx.lineWidth=0.6;ctx.stroke();
+        }
+      }
+    }
+    // Draw nodes
+    nodes.forEach(n=>{
+      const glow=1+Math.sin(n.pulse)*0.4;
+      const r=n.r*glow;
+      // Soft halo
+      const grad=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,r*5);
+      grad.addColorStop(0,'rgba(96,165,250,0.12)');grad.addColorStop(1,'transparent');
+      ctx.beginPath();ctx.arc(n.x,n.y,r*5,0,Math.PI*2);ctx.fillStyle=grad;ctx.fill();
+      // Core dot
+      ctx.beginPath();ctx.arc(n.x,n.y,r,0,Math.PI*2);
+      ctx.fillStyle=n.color+'44';ctx.fill();
+      ctx.strokeStyle=n.color+'99';ctx.lineWidth=0.8;ctx.stroke();
+    });
+    raf=requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize',()=>{W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight});
+  init();draw();
+})();
+</script>
+</body>
+</html>
